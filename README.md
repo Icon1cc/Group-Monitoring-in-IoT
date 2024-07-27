@@ -1,43 +1,95 @@
-### Project Title: Group Monitoring in Mobile IoT using ContikiNG and Node-RED
+# Group Monitoring in Mobile IoT
 
-#### Introduction
-This project focuses on developing a system for monitoring and analyzing group dynamics in a mobile Internet of Things (IoT) environment. Utilizing ContikiNG for managing IoT devices and Node-RED for backend processing, the system tracks the interactions between individuals carrying IoT devices, identifying group formations and alterations. This real-time monitoring can have applications in various fields, including smart city planning, event management, and social behavior analysis.
+## Project Overview
+This project demonstrates a system where IoT devices carried by individuals detect proximity using radio signals. The system tracks the formation and dissolution of groups when individuals come into contact. It also reports group changes to a back-end system and calculates statistics such as group lifetime, and average, maximum, and minimum group sizes over time.
 
-#### Project Objective
-The main objective is to create an IoT-based solution to detect and monitor groups of people in a given area, analyze the group dynamics, and report significant changes to a backend system for further analysis.
+### Technologies Used
+- **Contiki-NG**: An open-source operating system for the Internet of Things.
+- **Node-RED**: A flow-based development tool for visual programming.
 
-#### System Overview
-- **IoT Devices:** Individuals carry IoT devices that use radio signals as proximity sensors to detect the presence of other devices within a 1-hop distance.
-- **Group Dynamics:** When at least three individuals are in mutual contact, a "group" is formed. Changes in the group, such as the addition or departure of members, are tracked in real-time.
-- **Backend System:** A Node-RED based system processes the data from IoT devices, manages notifications, and computes statistics about each group.
+## Table of Contents
+1. [Introduction](#introduction)
+    1. [Description of the Project](#description-of-the-project)
+    2. [Assumptions and Guidelines](#assumptions-and-guidelines)
+    3. [Technologies and Implementation](#technologies-and-implementation)
+2. [Overall Structure](#overall-structure)
+    1. [COOJA](#cooja)
+    2. [RPL Border-Router](#rpl-border-router)
+    3. [UDP Signaler](#udp-signaler)
+    4. [MQTT-UDP Mote](#mqtt-udp-mote)
+3. [Implementation](#implementation)
+    1. [Frontend (Contiki-NG - COOJA)](#frontend-contiki-ng-cooja)
+    2. [Backend (Node-RED)](#backend-node-red)
+4. [Results](#results)
+5. [Conclusion and Future Work](#conclusion-and-future-work)
 
-#### Technology Stack
-- **ContikiNG:** Used for programming the IoT devices, enabling them to detect proximity and communicate with each other and the backend system.
-- **Node-RED:** Handles backend processing, including receiving notifications from IoT devices, data analysis, and generating statistical reports.
+## Introduction
 
-#### Implementation Details
-1. **IoT Device Configuration:** 
-   - Each device is equipped with ContikiNG OS.
-   - Devices use radio signals to detect other devices within a 1-hop range.
+### Description of the Project
+This project implements a system where IoT devices carried by individuals detect proximity using radio signals. When devices come within range, it identifies "in contact" individuals and forms "groups" of three or more people. Group changes are reported to the back-end system, which updates group statistics, including lifetime and membership details.
 
-2. **Group Detection and Monitoring:**
-   - A group is formed when a device detects at least two other devices within range.
-   - Group changes are monitored in real-time, with updates sent to the backend upon any change in group composition.
+### Assumptions and Guidelines
+- IoT devices are assumed to be reachable across multiple hops via a static IPv6 border router.
+- The COOJA simulator is used for testing.
+- Group membership is monitored periodically, with a timeout mechanism for handling departures.
 
-3. **Backend Processing with Node-RED:**
-   - Node-RED receives data about group formations and alterations.
-   - The backend system computes and stores statistics about groups, such as formation time, duration, and size variations.
+### Technologies and Implementation
+The project integrates **Contiki-NG** and **Node-RED**. Contiki-NG handles the IoT device interactions, while Node-RED manages back-end data processing and statistics calculation.
 
-4. **Statistical Analysis and Reporting:**
-   - Analysis includes calculating the lifetime of each group and the average, maximum, and minimum size.
-   - The backend periodically generates reports and insights based on the collected data.
+## Overall Structure
 
-#### Usage Scenarios
-This system can be used in various scenarios like monitoring crowd dynamics in events, analyzing social interactions in public spaces, or enhancing safety and security protocols by tracking group movements in real-time.
+### COOJA
+COOJA simulator is used to test IoT device interactions. It supports complex tests without memory constraints and uses the Constant Loss Unit-Disk Graph Model for reliable message transmission.
 
-#### Future Enhancements
-- Integrate advanced machine learning algorithms for predictive analysis of group behaviors.
-- Expand the system for larger scale implementations, considering challenges like device management and data scalability.
+### RPL Border-Router
+Acts as the root of the network, connecting all wireless sensors to the internet, ensuring smooth data transmission.
 
-#### Conclusion
-This project leverages the capabilities of ContikiNG and Node-RED to provide a comprehensive solution for real-time group monitoring in IoT environments, opening avenues for extensive applications in urban development, social studies, and event management.
+### UDP Signaler
+Manages dynamic interactions among IoT devices, transmitting signals to update the network about group changes.
+
+### MQTT-UDP Mote
+Handles both MQTT and UDP communications, ensuring efficient data transmission between the backend system and IoT devices.
+
+## Implementation
+
+### Frontend (Contiki-NG - COOJA)
+- **UDP Client Process**: Sends UDP packets to discover neighboring nodes and update the contact list.
+- **MQTT Client Process**: Manages MQTT client connections, subscriptions, and message publishing.
+- **Contact Management Functions**: Maintain the contact list and mutual contacts between IoT devices.
+- **Group Formation and Reporting Functions**: Report group formation to the backend via MQTT messages.
+- **Configuration Functions**: Initialize and update MQTT client configurations and topics.
+- **Helper Functions**: Assist in formatting MQTT messages, IP address manipulation, and JSON array construction.
+
+### Backend (Node-RED)
+- **Group Cardinality Updates**: Updates the number of active group members.
+- **Lifetime Tracking**: Calculates the lifetime of groups.
+- **Cardinality Statistics**: Tracks statistical data for each group.
+- **Periodic Monitoring**: Checks for inactive members and updates group statistics.
+- **Timeout Management**: Filters out inactive members.
+- **Group Dismantling**: Dismantles groups that fall below the minimum member count.
+- **Member Activity Updates**: Updates the last active time for group members.
+- **Membership Changes**: Updates changes in group membership.
+- **New Group Creation**: Creates new groups for senders not in existing groups.
+- **Array Comparison**: Checks for changes in group memberships.
+- **Group Survivability Check**: Dismantles groups with insufficient members.
+- **Main Execution Flow**: Manages group memberships and logs dismantled groups.
+- **Message Handling**: Processes incoming messages and updates group data.
+- **Context Management**: Maintains group data across function executions.
+
+## Results
+### Cooja Simulation
+Shows IoT devices connected and reporting group formations to the backend. The console logs confirm the correct implementation of group formation logic.
+
+### Node-RED Flow
+Configures the MQTT broker and processes incoming data to compute and display group statistics.
+
+## Conclusion and Future Work
+The project successfully demonstrated real-time monitoring and management of mobile IoT devices using Contiki-NG and Node-RED. Future improvements include:
+- **Scalability and Performance Optimization**: Enhance the system to handle more devices efficiently.
+- **Advanced Mobility Models**: Implement sophisticated mobility models for varied real-world scenarios.
+- **Enhanced Security Features**: Add stronger security measures to protect data.
+- **User Interface (UI) Enhancements**: Develop a comprehensive UI for better system monitoring and management.
+
+## Authors
+- **Rishabh Tiwari** - [rishtiwari98@gmail.com](mailto:rishtiwari98@gmail.com)
+- **Alexandre Boving** - [alexandre.boving@gmail.com](mailto:alexandre.boving@gmail.com)
